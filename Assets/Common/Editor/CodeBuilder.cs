@@ -233,4 +233,14 @@ namespace CodeBuilder
 		}
 	}
 
+	/// <summary>
+	/// 
+	/// </summary>
+	public class CodePretty
+	{
+		public static string Pretty(string plain)
+		{
+			return plain;
+		}
+	}
 }
