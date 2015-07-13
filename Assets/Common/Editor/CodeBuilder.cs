@@ -185,9 +185,9 @@ namespace CodeBuilder
 			if (ModifierList.Contains (Modifier.Abstract) == false) {
 				sb.AppendLine ("{");
 				sb.AppendLine (MethodBody);
-				sb.AppendLine ("}");
+				sb.Append ("}");
 			} else {
-				sb.AppendLine (";");
+				sb.Append (";");
 			}
 			return sb.ToString ();
 		}
@@ -238,9 +238,44 @@ namespace CodeBuilder
 	/// </summary>
 	public class CodePretty
 	{
-		public static string Pretty(string plain)
+		public string Pretty (string plain, int baseIndent = 0)
 		{
-			return plain;
+			if (string.IsNullOrEmpty (plain)) {
+				return plain;
+			}
+			int indentLevel = baseIndent;
+			StringBuilder sb = new StringBuilder ();
+			string[] lines = plain.Split (System.Environment.NewLine.ToCharArray ());
+			foreach (var line in lines) {
+				indentLevel -= CountChar (line, '}');
+				sb.AppendLine (Indent (line, indentLevel));
+				indentLevel += CountChar (line, '{');
+			}
+			return sb.ToString ();
+		}
+
+		private int CountChar (string txt, char findChar)
+		{
+			int hitCount = 0;
+			if (string.IsNullOrEmpty (txt)) {
+				return 0;
+			}
+			foreach (var c in txt) {
+				hitCount += ((c == findChar) ? 1 : 0);
+			}
+			return hitCount;
+		}
+
+		private string Indent (string txt, int indentLevel)
+		{
+			if (string.IsNullOrEmpty (txt)) {
+				return txt;
+			}
+			StringBuilder sb = new StringBuilder (txt);
+			for (var i = 0; i < indentLevel; ++i) {
+				sb.Insert (0, "\t");
+			}
+			return sb.ToString ();
 		}
 	}
 }

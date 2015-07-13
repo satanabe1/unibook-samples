@@ -17,6 +17,7 @@ public class TemplateMaterializer
 	[MenuItem(CommandPrefix + "/RecreateMenuItemCommands %t")]
 	public static void RecreateMenuItemCommands ()
 	{
+		Debug.LogError (EditorCommon.GetScriptPath<TemplateMaterializer> ());
 		TypeDeclaration typeDeclaration = new TypeDeclaration () { Name = "TemplateMaterializerCommand" };
 		// using
 		typeDeclaration.UsingDeclarationList.Add (new UsingDeclaration () {
@@ -41,11 +42,16 @@ public class TemplateMaterializer
 		method.AttributeList.Add (attribute);
 
 		typeDeclaration.MethodDeclarationList.Add (method);
-		Debug.Log (typeDeclaration.BuildCode ());
+
+		CodePretty pretty = new CodePretty();
+		string code = pretty.Pretty(typeDeclaration.BuildCode());
+		Debug.Log (code);
 
 		File.WriteAllText (
+			// path
 			EditorCommon.CombinePath (Application.dataPath, "TemplateMaterializer", "Editor", typeDeclaration.Name + ".design.cs"),
-			typeDeclaration.BuildCode ());
+			// code
+			code);
 		AssetDatabase.Refresh ();
 	}
 

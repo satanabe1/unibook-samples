@@ -93,6 +93,26 @@ public static class EditorCommon
 		return path;
 	}
 
+	public static string GetScriptPath<T> ()
+	{
+		return GetScriptPath (typeof(T));
+	}
+
+	public static string GetScriptPath (System.Type type)
+	{
+		string[] guids = AssetDatabase.FindAssets ("t:MonoScript");
+		foreach (var guid in guids) {
+			string scriptPath = AssetDatabase.GUIDToAssetPath (guid);
+			MonoScript script = AssetDatabase.LoadAssetAtPath<MonoScript> (scriptPath);
+			if (script != null) {
+				if (script.GetClass () == type) {
+					return scriptPath;
+				}
+			}
+		}
+		return string.Empty;
+	}
+
 	public static string ListToString<T> (List<T> list)
 	{
 		if ((list == null) || (list.Count == 0)) {
