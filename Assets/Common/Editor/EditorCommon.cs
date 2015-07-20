@@ -113,24 +113,26 @@ public static class EditorCommon
 		return string.Empty;
 	}
 
-	public static string ListToString<T> (List<T> list)
+	public static string CollectionToString<T> (ICollection<T> collection)
 	{
-		if ((list == null) || (list.Count == 0)) {
+		if ((collection == null) || (collection.Count == 0)) {
 			return string.Empty;
 		}
 		var sb = new System.Text.StringBuilder ();
-		list.ForEach ((node) => sb.Append (node).Append (", "));
+		foreach (var element in collection) {
+			sb.Append (element).Append (", ");
+		}
 		return sb.ToString ();
 	}
         
 	public static void OpenFolder (string path)
 	{
-		#if UNITY_EDITOR_OSX
-            System.Diagnostics.Process.Start("open", path);
-		#elif UNITY_EDITOR_WIN
-            System.Diagnostics.Process.Start("explorer.exe", "/select," + module.FolderPath);
-		#else
-		EditorUtility.RevealInFinder (module.FolderPath);
-		#endif
+#if UNITY_EDITOR_OSX
+		System.Diagnostics.Process.Start("open", path);
+#elif UNITY_EDITOR_WIN
+		System.Diagnostics.Process.Start("explorer.exe", "/select," + path);
+#else
+		EditorUtility.RevealInFinder (path);
+#endif
 	}
 }

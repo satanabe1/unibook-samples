@@ -233,12 +233,155 @@ namespace CodeBuilder
 		}
 	}
 
+	public static class InvocationHelper
+	{
+		public static string MethodToStringFormat (System.Reflection.MethodInfo method)
+		{
+			if (method == null) {
+				return string.Empty;
+			}
+			StringBuilder sb = new StringBuilder ();
+			sb.Append (method.DeclaringType.FullName).Append ('.').Append (method.Name);
+			sb.Append ('(');
+			System.Reflection.ParameterInfo[] parameters = method.GetParameters ();
+			for (var i = 0; i < parameters.Length; ++i) {
+				sb.Append ('{').Append (i).Append ('}');
+				if (i + 1 < parameters.Length) {
+					sb.Append (", ");
+				}
+			}
+			sb.Append (')');
+			return sb.ToString ();
+		}
+
+		#region // System.Action
+		public static string CreateMethodInvocation (System.Action method)
+		{
+			return MethodToStringFormat (method);
+		}
+
+		public static string CreateMethodInvocation<T> (System.Action<T> method, T arg)
+		{
+			string format = MethodToStringFormat (method);
+			if (string.IsNullOrEmpty (format)) {
+				return string.Empty;
+			}
+			return string.Format (format, ArgumentToString (arg));
+		}
+
+		public static string CreateMethodInvocation<T0, T1> (System.Action<T0, T1> method, T0 arg0, T1 arg1)
+		{
+			string format = MethodToStringFormat (method);
+			if (string.IsNullOrEmpty (format)) {
+				return string.Empty;
+			}
+			return string.Format (format, ArgumentToString (arg0), ArgumentToString (arg1));
+		}
+
+		public static string CreateMethodInvocation<T0, T1, T2> (System.Action<T0, T1, T2> method,
+		                                                         T0 arg0, T1 arg1, T2 arg2)
+		{
+			string format = MethodToStringFormat (method);
+			if (string.IsNullOrEmpty (format)) {
+				return string.Empty;
+			}
+			return string.Format (format, ArgumentToString (arg0), ArgumentToString (arg1), ArgumentToString (arg2));
+		}
+
+		public static string MethodToStringFormat (System.Action method)
+		{
+			return MethodToStringFormat ((method != null) ? method.Method : null);
+		}
+		
+		public static string MethodToStringFormat<T> (System.Action<T> method)
+		{
+			return MethodToStringFormat ((method != null) ? method.Method : null);
+		}
+		
+		public static string MethodToStringFormat<T0, T1> (System.Action<T0, T1> method)
+		{
+			return MethodToStringFormat ((method != null) ? method.Method : null);
+		}
+
+		public static string MethodToStringFormat<T0, T1, T2> (System.Action<T0, T1, T2> method)
+		{
+			return MethodToStringFormat ((method != null) ? method.Method : null);
+		}
+		#endregion // System.Action
+
+		#region // System.Func
+		public static string CreateMethodInvocation<ReturnType> (System.Func<ReturnType> method)
+		{
+			return MethodToStringFormat (method);
+		}
+
+		public static string CreateMethodInvocation<T, ReturnType> (System.Func<T, ReturnType> method, T arg)
+		{
+			string format = MethodToStringFormat (method);
+			if (string.IsNullOrEmpty (format)) {
+				return string.Empty;
+			}
+			return string.Format (format, ArgumentToString (arg));
+		}
+
+		public static string CreateMethodInvocation<T0, T1, ReturnType> (System.Func<T0, T1> method, T0 arg0, T1 arg1)
+		{
+			string format = MethodToStringFormat (method);
+			if (string.IsNullOrEmpty (format)) {
+				return string.Empty;
+			}
+			return string.Format (format, ArgumentToString (arg0), ArgumentToString (arg1));
+		}
+
+		public static string CreateMethodInvocation<T0, T1, T2, ReturnType> (System.Func<T0, T1> method,
+		                                                                     T0 arg0, T1 arg1, T2 arg2)
+		{
+			string format = MethodToStringFormat (method);
+			if (string.IsNullOrEmpty (format)) {
+				return string.Empty;
+			}
+			return string.Format (format, ArgumentToString (arg0), ArgumentToString (arg1), ArgumentToString (arg2));
+		}
+
+		public static string MethodToStringFormat<ReturnType> (System.Func<ReturnType> method)
+		{
+			return MethodToStringFormat ((method != null) ? method.Method : null);
+		}
+		
+		public static string MethodToStringFormat<T, ReturnType> (System.Func<T, ReturnType> method)
+		{
+			return MethodToStringFormat ((method != null) ? method.Method : null);
+		}
+		
+		public static string MethodToStringFormat<T0, T1, ReturnType> (System.Func<T0, T1, ReturnType> method)
+		{
+			return MethodToStringFormat ((method != null) ? method.Method : null);
+		}
+
+		public static string MethodToStringFormat<T0, T1, T2, ReturnType> (System.Func<T0, T1, T2, ReturnType> method)
+		{
+			return MethodToStringFormat ((method != null) ? method.Method : null);
+		}
+		#endregion // System.Func
+
+		private static string ArgumentToString<T> (T arg)
+		{
+			if (arg == null) {
+				return "null";
+			}
+			if (typeof(T) == typeof(string)) {
+				return "\"" + arg + "\"";
+			}
+			return arg.ToString ();
+		}
+	}
+
 	/// <summary>
 	/// 
 	/// </summary>
-	public class CodePretty
+	public static class CodeIndenter
 	{
-		public string Pretty (string plain, int baseIndent = 0)
+		public static string Pretty (string plain, int baseIndent = 0)
 		{
 			if (string.IsNullOrEmpty (plain)) {
 				return plain;
@@ -254,7 +397,7 @@ namespace CodeBuilder
 			return sb.ToString ();
 		}
 
-		private int CountChar (string txt, char findChar)
+		private static int CountChar (string txt, char findChar)
 		{
 			int hitCount = 0;
 			if (string.IsNullOrEmpty (txt)) {
@@ -266,10 +409,13 @@ namespace CodeBuilder
 			return hitCount;
 		}
 
-		private string Indent (string txt, int indentLevel)
+		private static string Indent (string txt, int indentLevel)
 		{
+			while ((string.IsNullOrEmpty(txt) == false) && (txt[0] == '\t')) {
+				txt = txt.Substring (1);
+			}
 			if (string.IsNullOrEmpty (txt)) {
-				return txt;
+				return string.Empty;
 			}
 			StringBuilder sb = new StringBuilder (txt);
 			for (var i = 0; i < indentLevel; ++i) {

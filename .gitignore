@@ -44,3 +44,7 @@ Assembly-*
 *.booproj
 Temp
 
+# Templatematerializer
+Assets/TemplateMaterializer/Editor/TemplateMaterializerCommand.design.cs
+Assets/TemplateMaterializer/Editor/TemplateMaterializerCommand.design.cs.meta
+
