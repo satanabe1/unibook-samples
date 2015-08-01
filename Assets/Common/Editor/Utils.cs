@@ -4,33 +4,6 @@ using System.Collections;
 
 public class Utils
 {
-	[InitializeOnLoad]
-	public class CodeMaterializer
-	{
-		[MenuItem("Assets/CreateCode")]
-		public static void MaterializeDefaultTemplate ()
-		{
-//			Debug.LogError (Selection.activeObject);
-			UnityEditorInternal.InternalEditorUtility.ExecuteCommandOnKeyWindow ("Quit");
-			UnityEditor.EditorWindow.focusedWindow.SendEvent (new Event () {
-				keyCode = KeyCode.P,
-				type = EventType.KeyDown,
-//				modifiers = EventModifiers.Command,
-				command = true,
-			});
-//			UnityEditor.EditorApplication.Exit(0);
-			var eventKey = new Event ();
-			eventKey.command = true;
-			eventKey.control = true;
-			Debug.Log("hoge");
-		}
-
-		public static void MaterializeCustomTemplate (string templatePath, string outPath)
-		{
-
-		}
-	}
-
 	[MenuItem("Assets/RenameTest")]
 	[MenuItem("Assets/RenameTest1")]
 	[MenuItem("Hierarchy/RenameTest1")]
@@ -38,6 +11,11 @@ public class Utils
 	public static void RenameCommand ()
 	{
 		EngageRenameMode (Selection.activeObject);
+	}
+
+	public static void RenameCommand (Object obj)
+	{
+		EngageRenameMode (obj);
 	}
 
 	public static void EngageRenameMode (Object go)

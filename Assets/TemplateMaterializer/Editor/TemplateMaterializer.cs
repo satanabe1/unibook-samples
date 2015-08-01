@@ -14,7 +14,19 @@ public class TemplateMaterializer
 	public const string MenuCommandPrefix = "Assets/TemplateMaterializer";
 	public const string MaterializeCommandPrefix = "Assets/Create";
 	public const string TemplatesDirName = "Templates";
-	public const string TemplateExtention = ".cs.template";
+	public const string TemplateExtention = ".template";
+	public static string _projectRootPathCache;
+
+	public static string ProjectRootPath {
+		get {
+			if (_projectRootPathCache != null) {
+				return _projectRootPathCache;
+			}
+			_projectRootPathCache = Directory.GetParent (Application.dataPath).ToString ();
+			return _projectRootPathCache;
+		}
+	}
+
 	private static string _scriptDirPathCache;
 
 	public static string ScriptDirPath {
@@ -107,10 +119,35 @@ public class TemplateMaterializer
 	public static void GenerateCode (string templatePath)
 	{
 		Debug.Log ("hoge: " + templatePath);
+		string distDirPath = Application.dataPath;
+		if (Selection.activeObject != null) {
+			distDirPath = Path.Combine (ProjectRootPath, AssetDatabase.GetAssetPath (Selection.activeObject));
+		}
+		if (File.Exists (distDirPath)) {
+			distDirPath = Directory.GetParent (distDirPath).ToString ();
+		}
+		if (Directory.Exists (distDirPath) == false) {
+			Directory.CreateDirectory (distDirPath);
+		}
+		// "Hoge.cs.template" -> "Hoge.cs"
+		string templateNameWithoutMetaExtention = Path.GetFileNameWithoutExtension (templatePath);
+		// "Hoge.cs" -> ".cs"
+		string templateExtention = Path.GetExtension (templateNameWithoutMetaExtention);
+		// "Assets/NewClass.cs"
+		string distPath = Path.Combine (distDirPath, "NewClass" + templateExtention);
+		GenerateCode (templatePath, distPath);
 	}
 
 	public static void GenerateCode (string templatePath, string distPath)
 	{
-		Debug.Log ("hoge: " + templatePath);
+		Debug.Log ("hoge2: " + templatePath);
+		Debug.Log ("hoge3: " + distPath);
+		Utils.RenameCommand (Selection.activeObject);
+		FileMoveWatcher renameWatcher = new FileMoveWatcher ();
+		renameWatcher.Watch (Selection.activeObject, (from, to) => {
+			Debug.Log ("Move " + from + " To " + to);
+			renameWatcher.Dispose ();
+			return true;
+		});
 	}
 }
