@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿//#define VERBOSE_LOG
+using UnityEngine;
 using UnityEditor;
 using System.IO;
 using System.Collections;
@@ -57,7 +58,10 @@ public class TemplateMaterializer
 	public static void RecreateMenuItemCommands ()
 	{
 		string[] templateFilePaths = FindTemplateFilePaths (TemplatesDirPath);
+#if VERBOSE_LOG
+		DumpStatics();
 		Debug.Log (EditorCommon.CollectionToString (templateFilePaths));
+#endif
 
 		TypeDeclaration commandType = CreateEmptyCommandType ();
 		foreach (var templateFilePath in templateFilePaths) {
@@ -101,7 +105,9 @@ public class TemplateMaterializer
 	{
 		string templateName = Path.GetFileNameWithoutExtension (templateFilePath).Replace ('.', '_').Replace (' ', '_');
 		StringBuilder methodBody = new StringBuilder ();
+#if VERBOSE_LOG
 		methodBody.Append (InvocationHelper.CreateMethodInvocation<object> (Debug.Log, "\"" + templateFilePath + "\"")).AppendLine (";");
+#endif
 		methodBody.Append (InvocationHelper.CreateMethodInvocation<string> (GenerateCode, templateFilePath)).AppendLine (";");
 		// public static void CreateHoge() {}
 		MethodDeclaration method = new MethodDeclaration () { Name = "Create" +  templateName};
@@ -119,7 +125,9 @@ public class TemplateMaterializer
 
 	public static void GenerateCode (string templatePath)
 	{
+#if VERBOSE_LOG
 		Debug.Log ("templatePath: " + templatePath);
+#endif
 		string distDirPath = Application.dataPath;
 		if (Selection.activeObject != null) {
 			distDirPath = Path.Combine (ProjectRootPath, AssetDatabase.GetAssetPath (Selection.activeObject));
@@ -152,15 +160,17 @@ public class TemplateMaterializer
 		Object newClassFile = AssetDatabase.LoadAssetAtPath<Object> (uniqueDistPath.Substring (ProjectRootPath.Length + 1));
 		Selection.activeObject = newClassFile;
 		EditorCommon.DelayCall (2f / 60f, () => {
-			Utils.RenameCommand (newClassFile);
+			EditorCommon.RenameCommand (newClassFile);
 			FileMoveWatcher renameWatcher = new FileMoveWatcher ();
 			renameWatcher.Watch (Selection.activeObject, (from, to) => {
+#if VERBOSE_LOG
 				Debug.Log ("Move " + from + " To " + to);
+#endif
 				renameWatcher.Dispose ();
 				renameWatcher = null;
 				if (DirtyTemplate (to)) {
 					AssetDatabase.CopyAsset (to, to + fileExtension);
-					Utils.SelectAssetPath (to + fileExtension);
+					EditorCommon.SelectAssetPath (to + fileExtension);
 					EditorCommon.DelayCall (2f / 60f, () => {
 						AssetDatabase.DeleteAsset (to);
 						AssetDatabase.Refresh ();

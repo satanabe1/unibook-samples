@@ -144,6 +144,44 @@ public static class EditorCommon
 		EditorApplication.update += delayCaller;
 	}
 
+	public static void RenameCommand (Object obj)
+	{
+		EngageRenameMode (obj);
+	}
+	
+	public static void EngageRenameMode (Object go)
+	{
+		Selection.activeObject = go;
+		//		GetFocusedWindow ("Hierarchy").SendEvent (Events.Rename);
+		GetFocusedWindow ("Project").SendEvent (Events.Rename);
+		//		UnityEditor.EditorWindow.focusedWindow.SendEvent(Events.Rename);
+	}
+	
+	public static EditorWindow GetFocusedWindow (string window)
+	{
+		FocusOnWindow (window);
+		return EditorWindow.focusedWindow;
+	}
+	
+	public static void FocusOnWindow (string window)
+	{
+		EditorApplication.ExecuteMenuItem ("Window/" + window);
+	}
+
+	public static void SelectAssetPath (string assetPath)
+	{
+		Selection.activeObject = AssetDatabase.LoadAssetAtPath<Object> (assetPath);
+	}
+    
+	public static class Events
+	{
+		#if UNITY_EDITOR_WIN
+		public static Event Rename = new Event () { keyCode = KeyCode.F2, type = EventType.KeyDown };
+        #else
+		public static Event Rename = new Event () { keyCode = KeyCode.Return, type = EventType.KeyDown };
+        #endif
+	}
+
 	public static void OpenFolder (string path)
 	{
 #if UNITY_EDITOR_OSX
