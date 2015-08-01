@@ -133,6 +133,7 @@ public static class EditorCommon
 		double startTime = EditorApplication.timeSinceStartup;
 		EditorApplication.CallbackFunction delayCaller = () => {
 			double duration = EditorApplication.timeSinceStartup - startTime;
+			Debug.Log ("DelayCall Duration : " + duration);
 			if (duration > delay) {
 				function.Invoke ();
 			}

@@ -14,7 +14,7 @@ public class TemplateMaterializer
 	public const string MenuCommandPrefix = "Assets/TemplateMaterializer";
 	public const string MaterializeCommandPrefix = "Assets/Create";
 	public const string TemplatesDirName = "Templates";
-	public const string TemplateExtention = ".template";
+	public const string TemplateExtension = ".template";
 	public static string _projectRootPathCache;
 
 	public static string ProjectRootPath {
@@ -81,7 +81,7 @@ public class TemplateMaterializer
 		if (Directory.Exists (dirPath) == false) {
 			return new string[0];
 		}
-		return Directory.GetFiles (dirPath, "*" + TemplateExtention, SearchOption.AllDirectories);
+		return Directory.GetFiles (dirPath, "*" + TemplateExtension, SearchOption.AllDirectories);
 	}
 
 	private static TypeDeclaration CreateEmptyCommandType ()
@@ -130,24 +130,36 @@ public class TemplateMaterializer
 			Directory.CreateDirectory (distDirPath);
 		}
 		// "Hoge.cs.template" -> "Hoge.cs"
-		string templateNameWithoutMetaExtention = Path.GetFileNameWithoutExtension (templatePath);
+		string templateNameWithoutMetaExtension = Path.GetFileNameWithoutExtension (templatePath);
 		// "Hoge.cs" -> ".cs"
-		string templateExtention = Path.GetExtension (templateNameWithoutMetaExtention);
+		string templateExtension = Path.GetExtension (templateNameWithoutMetaExtension);
 		// "Assets/NewClass.cs"
-		string distPath = Path.Combine (distDirPath, "NewClass" + templateExtention);
+		string distPath = Path.Combine (distDirPath, "NewClass" + templateExtension);
 		GenerateCode (templatePath, distPath);
 	}
 
 	public static void GenerateCode (string templatePath, string distPath)
 	{
-		Debug.Log ("hoge2: " + templatePath);
-		Debug.Log ("hoge3: " + distPath);
-		Utils.RenameCommand (Selection.activeObject);
-		FileMoveWatcher renameWatcher = new FileMoveWatcher ();
-		renameWatcher.Watch (Selection.activeObject, (from, to) => {
-			Debug.Log ("Move " + from + " To " + to);
-			renameWatcher.Dispose ();
-			return true;
+		string distFileName = Path.GetFileNameWithoutExtension (distPath);
+		string fileExtension = Path.GetExtension (distPath);
+		string distPathWithoutExtension = distPath.Substring (0, distPath.Length - fileExtension.Length);
+		string uniqueDistPath = distPathWithoutExtension;
+		for (var i = 1; File.Exists(uniqueDistPath); ++i) {
+			uniqueDistPath = distPathWithoutExtension + " " + i;
+		}
+		File.Copy (templatePath, uniqueDistPath);
+		AssetDatabase.Refresh ();
+		Object newClassFile = AssetDatabase.LoadAssetAtPath<Object> (uniqueDistPath.Substring (ProjectRootPath.Length + 1));
+		Selection.activeObject = newClassFile;
+		EditorCommon.DelayCall (2f / 60f, () => {
+			Utils.RenameCommand (newClassFile);
+			FileMoveWatcher renameWatcher = new FileMoveWatcher ();
+			renameWatcher.Watch (Selection.activeObject, (from, to) => {
+				Debug.Log ("Move " + from + " To " + to);
+				renameWatcher.Dispose ();
+				renameWatcher = null;
+				return true;
+			});
 		});
 	}
 }
