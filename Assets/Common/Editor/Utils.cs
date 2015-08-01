@@ -4,6 +4,11 @@ using System.Collections;
 
 public class Utils
 {
+	public static void SelectAssetPath(string path)
+	{
+		Selection.activeObject = AssetDatabase.LoadAssetAtPath<Object>(path);
+	}
+
 	[MenuItem("Assets/RenameTest")]
 	[MenuItem("Assets/RenameTest1")]
 	[MenuItem("Hierarchy/RenameTest1")]

@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using CodeBuilder;
+using CustomTemplate;
 
 /// <summary>
 /// テンプレートから、コードを生成する
@@ -12,9 +13,10 @@ using CodeBuilder;
 public class TemplateMaterializer
 {
 	public const string MenuCommandPrefix = "Assets/TemplateMaterializer";
-	public const string MaterializeCommandPrefix = "Assets/Create";
+	public const string MaterializeCommandPrefix = "Assets/Create From Template";
+	public const int MaterializeCommandPriority = 10;
 	public const string TemplatesDirName = "Templates";
-	public const string TemplateExtension = ".template";
+	public const string TemplateExtension = ".tmtemplate";
 	public static string _projectRootPathCache;
 
 	public static string ProjectRootPath {
@@ -54,15 +56,14 @@ public class TemplateMaterializer
 	[MenuItem(MenuCommandPrefix + "/RecreateMenuItemCommands %t")]
 	public static void RecreateMenuItemCommands ()
 	{
-		DumpStatics ();
 		string[] templateFilePaths = FindTemplateFilePaths (TemplatesDirPath);
-		Debug.LogWarning (EditorCommon.CollectionToString (templateFilePaths));
+		Debug.Log (EditorCommon.CollectionToString (templateFilePaths));
 
 		TypeDeclaration commandType = CreateEmptyCommandType ();
 		foreach (var templateFilePath in templateFilePaths) {
 			commandType.MethodDeclarationList.Add (CreateMaterializeCommandMethod (templateFilePath));
 		}
-		Debug.LogError (commandType.BuildCode ());
+		Debug.Log (commandType.BuildCode ());
 		string code = CodeIndenter.Pretty (commandType.BuildCode ());
 
 		File.WriteAllText (EditorCommon.CombinePath (ScriptDirPath, commandType.Name + ".design.cs"), code);
@@ -111,14 +112,14 @@ public class TemplateMaterializer
 		AttributeText attribute = new AttributeText () { Name = typeof(MenuItem).Name};
 		attribute.ParameterList.Add (MaterializeCommandPrefix + "/Create " + templateName);
 		attribute.ParameterList.Add (false);
-		attribute.ParameterList.Add (90);
+		attribute.ParameterList.Add (MaterializeCommandPriority);
 		method.AttributeList.Add (attribute);
 		return method;
 	}
 
 	public static void GenerateCode (string templatePath)
 	{
-		Debug.Log ("hoge: " + templatePath);
+		Debug.Log ("templatePath: " + templatePath);
 		string distDirPath = Application.dataPath;
 		if (Selection.activeObject != null) {
 			distDirPath = Path.Combine (ProjectRootPath, AssetDatabase.GetAssetPath (Selection.activeObject));
@@ -140,12 +141,11 @@ public class TemplateMaterializer
 
 	public static void GenerateCode (string templatePath, string distPath)
 	{
-		string distFileName = Path.GetFileNameWithoutExtension (distPath);
 		string fileExtension = Path.GetExtension (distPath);
 		string distPathWithoutExtension = distPath.Substring (0, distPath.Length - fileExtension.Length);
 		string uniqueDistPath = distPathWithoutExtension;
-		for (var i = 1; File.Exists(uniqueDistPath); ++i) {
-			uniqueDistPath = distPathWithoutExtension + " " + i;
+		for (var i = 1; File.Exists(uniqueDistPath) || File.Exists(uniqueDistPath + fileExtension); ++i) {
+			uniqueDistPath = distPathWithoutExtension + i;
 		}
 		File.Copy (templatePath, uniqueDistPath);
 		AssetDatabase.Refresh ();
@@ -158,8 +158,45 @@ public class TemplateMaterializer
 				Debug.Log ("Move " + from + " To " + to);
 				renameWatcher.Dispose ();
 				renameWatcher = null;
+				if (DirtyTemplate (to)) {
+					AssetDatabase.CopyAsset (to, to + fileExtension);
+					Utils.SelectAssetPath (to + fileExtension);
+					EditorCommon.DelayCall (2f / 60f, () => {
+						AssetDatabase.DeleteAsset (to);
+						AssetDatabase.Refresh ();
+						EditorUtility.UnloadUnusedAssetsImmediate (true);
+					});
+				}
 				return true;
 			});
 		});
+	}
+
+	private static bool DirtyTemplate (string templatePath)
+	{
+		if (string.IsNullOrEmpty (templatePath)) {
+			return false;
+		}
+		if (File.Exists (templatePath) == false) {
+			return false;
+		}
+		try {
+			string className = Path.GetFileNameWithoutExtension (templatePath);
+			// read
+			string templateFullPath = Path.Combine (ProjectRootPath, templatePath);
+			string templateText = File.ReadAllText (templateFullPath);
+			// parse
+			ITemplateParser parser = new RoughlyTemplateParser ();
+			// customize
+			TemplateCustomizer customizer = new TemplateCustomizer (parser.ParseTemplate (templateText));
+			customizer.RenameClassName (className);
+			string code = customizer.BuildCode ();
+			// rewrite
+			File.WriteAllText (templatePath, code);
+			return true;
+		} catch (System.Exception ex) {
+			Debug.LogError (ex);
+		}
+		return false;
 	}
 }
