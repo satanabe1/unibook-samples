@@ -20,17 +20,12 @@ public class Utils
 
 	public static void EngageRenameMode (Object go)
 	{
-		SelectObject (go);
+		Selection.activeObject = go;
 //		GetFocusedWindow ("Hierarchy").SendEvent (Events.Rename);
 		GetFocusedWindow ("Project").SendEvent (Events.Rename);
 //		UnityEditor.EditorWindow.focusedWindow.SendEvent(Events.Rename);
 	}
-	
-	public static void SelectObject (Object obj)
-	{
-		Selection.objects = new Object[] { obj };
-	}
-	
+
 	public static EditorWindow GetFocusedWindow (string window)
 	{
 		FocusOnWindow (window);

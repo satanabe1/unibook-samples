@@ -124,7 +124,25 @@ public static class EditorCommon
 		}
 		return sb.ToString ();
 	}
-        
+
+	public static void DelayCall (float delay, System.Action function)
+	{
+		if (function == null) {
+			return;
+		}
+		double startTime = EditorApplication.timeSinceStartup;
+		EditorApplication.CallbackFunction delayCaller = () => {
+			double duration = EditorApplication.timeSinceStartup - startTime;
+			if (duration > delay) {
+				function.Invoke ();
+			}
+		};
+		function += () => {
+			EditorApplication.update -= delayCaller;
+		};
+		EditorApplication.update += delayCaller;
+	}
+
 	public static void OpenFolder (string path)
 	{
 #if UNITY_EDITOR_OSX
