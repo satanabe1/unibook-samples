@@ -59,7 +59,7 @@ public class TemplateMaterializer
 	{
 		string[] templateFilePaths = FindTemplateFilePaths (TemplatesDirPath);
 #if VERBOSE_LOG
-		DumpStatics();
+		DumpStatics ();
 		Debug.Log (EditorCommon.CollectionToString (templateFilePaths));
 #endif
 
@@ -209,6 +209,7 @@ public class TemplateMaterializer
 			TemplateCustomizer customizer = new TemplateCustomizer (parser.ParseTemplate (templateText));
 			customizer.RenameClassName (className);
 			customizer.RenameNamespace (namespaceName);
+			customizer.UpdateTimestamp ();
 			string code = customizer.BuildCode ();
 			// rewrite
 			File.WriteAllText (templatePath, code);

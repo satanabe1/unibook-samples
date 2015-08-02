@@ -9,6 +9,7 @@ namespace CustomTemplate
 	{
 		public const string ClassName = "$ClassName$";
 		public const string Namespace = "$Namespace$";
+		public const string DateTime = "$Timestamp$";
 	}
 
 	public interface INode
@@ -33,6 +34,10 @@ namespace CustomTemplate
 	}
 
 	public class NamespaceNameNode : VariableTextNode
+	{
+	}
+
+	public class TimestampNode : VariableTextNode
 	{
 	}
 
@@ -72,6 +77,7 @@ namespace CustomTemplate
 			parseResult.Add (new PlainTextNode () { Text = line });
 			parseResult = ParseLineNodes<ClassNameNode> (parseResult, TemplateKeyword.ClassName);
 			parseResult = ParseLineNodes<NamespaceNameNode> (parseResult, TemplateKeyword.Namespace);
+			parseResult = ParseLineNodes<TimestampNode> (parseResult, TemplateKeyword.DateTime);
 			return parseResult;
 		}
 
@@ -124,6 +130,12 @@ namespace CustomTemplate
 		{
 			namespaceName = namespaceName.Replace (' ', '_').Replace ("\\t", "_").Replace (System.IO.Path.DirectorySeparatorChar, '.');
 			ChangeVariableTextNodeValue<NamespaceNameNode> (namespaceName);
+		}
+
+		public void UpdateTimestamp (string format = "G")
+		{
+			string dateTimeString = System.DateTime.Now.ToString ((format ?? "G"));
+			ChangeVariableTextNodeValue<TimestampNode> (dateTimeString);
 		}
 
 		public void ChangeVariableTextNodeValue<T> (string text)
