@@ -172,7 +172,12 @@ public static class EditorCommon
 	{
 		Selection.activeObject = AssetDatabase.LoadAssetAtPath<Object> (assetPath);
 	}
-    
+
+	public static string GetParentDirectoryPath(string path)
+	{
+		return System.IO.Directory.GetParent(path).ToString();
+	}
+
 	public static class Events
 	{
 		#if UNITY_EDITOR_WIN

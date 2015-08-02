@@ -1,4 +1,4 @@
-﻿//#define VERBOSE_LOG
+﻿#define VERBOSE_LOG
 using UnityEngine;
 using UnityEditor;
 using System.IO;
@@ -159,7 +159,7 @@ public class TemplateMaterializer
 		AssetDatabase.Refresh ();
 		Object newClassFile = AssetDatabase.LoadAssetAtPath<Object> (uniqueDistPath.Substring (ProjectRootPath.Length + 1));
 		Selection.activeObject = newClassFile;
-		EditorCommon.DelayCall (2f / 60f, () => {
+		EditorCommon.DelayCall (3f / 60f, () => {
 			EditorCommon.RenameCommand (newClassFile);
 			FileMoveWatcher renameWatcher = new FileMoveWatcher ();
 			renameWatcher.Watch (Selection.activeObject, (from, to) => {
@@ -182,6 +182,11 @@ public class TemplateMaterializer
 		});
 	}
 
+	/// <summary>
+	/// templatePath : "Assets/NewClass.cs" ...
+	/// </summary>
+	/// <returns><c>true</c>, if template was dirtyed, <c>false</c> otherwise.</returns>
+	/// <param name="templatePath">Template path.</param>
 	private static bool DirtyTemplate (string templatePath)
 	{
 		if (string.IsNullOrEmpty (templatePath)) {
@@ -192,6 +197,9 @@ public class TemplateMaterializer
 		}
 		try {
 			string className = Path.GetFileNameWithoutExtension (templatePath);
+			string templateDir = EditorCommon.GetParentDirectoryPath (templatePath);
+			string namespaceName = (templateDir.Length < "Assets/".Length) ?
+				string.Empty : templateDir.Substring ("Assets/".Length);
 			// read
 			string templateFullPath = Path.Combine (ProjectRootPath, templatePath);
 			string templateText = File.ReadAllText (templateFullPath);
@@ -200,6 +208,7 @@ public class TemplateMaterializer
 			// customize
 			TemplateCustomizer customizer = new TemplateCustomizer (parser.ParseTemplate (templateText));
 			customizer.RenameClassName (className);
+			customizer.RenameNamespace (namespaceName);
 			string code = customizer.BuildCode ();
 			// rewrite
 			File.WriteAllText (templatePath, code);

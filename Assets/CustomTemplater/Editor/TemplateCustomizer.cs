@@ -8,6 +8,7 @@ namespace CustomTemplate
 	public static class TemplateKeyword
 	{
 		public const string ClassName = "$ClassName$";
+		public const string Namespace = "$Namespace$";
 	}
 
 	public interface INode
@@ -28,6 +29,10 @@ namespace CustomTemplate
 	}
 
 	public class ClassNameNode : VariableTextNode
+	{
+	}
+
+	public class NamespaceNameNode : VariableTextNode
 	{
 	}
 
@@ -64,29 +69,39 @@ namespace CustomTemplate
 				return new List<INode> (0);
 			}
 			var parseResult = new List<INode> ();
-			int classNameIndex = -1;
-			while ((classNameIndex = line.IndexOf(TemplateKeyword.ClassName)) > -1) {
-				if (classNameIndex == 0) {
-					ClassNameNode classNameNode = new ClassNameNode () {
-						PlainText = TemplateKeyword.ClassName,
-						Text = TemplateKeyword.ClassName,
-					};
-					parseResult.Add (classNameNode);
-					line = line.Substring (TemplateKeyword.ClassName.Length);
-				} else {
-					PlainTextNode plainTextNode = new PlainTextNode () {
-						Text = line.Substring(0, classNameIndex),
-					};
-					parseResult.Add (plainTextNode);
-					line = line.Substring (classNameIndex);
+			parseResult.Add (new PlainTextNode () { Text = line });
+			parseResult = ParseLineNodes<ClassNameNode> (parseResult, TemplateKeyword.ClassName);
+			parseResult = ParseLineNodes<NamespaceNameNode> (parseResult, TemplateKeyword.Namespace);
+			return parseResult;
+		}
+
+		protected List<INode> ParseLineNodes<T> (List<INode> nodes, string keyword)
+			where T : VariableTextNode, new ()
+		{
+			var retList = new List<INode> ();
+			for (var i = 0; i < nodes.Count; ++i) {
+				if ((nodes [i] is PlainTextNode) == false) {
+					retList.Add (nodes [i]);
+					continue;
+				}
+				string nodeText = nodes [i].Text;
+				int keywordIndex = -1;
+				while ((keywordIndex = nodeText.IndexOf(keyword)) > -1) {
+					if (keywordIndex == 0) {
+						T classNameNode = new T () { PlainText = keyword, Text = keyword };
+						retList.Add (classNameNode);
+						nodeText = nodeText.Substring (keyword.Length);
+					} else {
+						string text = nodeText.Substring (0, keywordIndex);
+						retList.Add (new PlainTextNode () { Text = text });
+						nodeText = nodeText.Substring (keywordIndex);
+					}
+				}
+				if (string.IsNullOrEmpty (nodeText) == false) {
+					retList.Add (new PlainTextNode () { Text = nodeText });
 				}
 			}
-			if (string.IsNullOrEmpty(line) == false)
-			{
-				PlainTextNode lastTextNode = new PlainTextNode () { Text = line };
-				parseResult.Add (lastTextNode);
-			}
-			return parseResult;
+			return retList;
 		}
 	}
 
@@ -101,10 +116,23 @@ namespace CustomTemplate
 
 		public void RenameClassName (string typeName)
 		{
+			typeName = typeName.Replace (" ", "_").Replace ("\\t", "_");
+			ChangeVariableTextNodeValue<ClassNameNode> (typeName);
+		}
+
+		public void RenameNamespace (string namespaceName)
+		{
+			namespaceName = namespaceName.Replace (' ', '_').Replace ("\\t", "_").Replace (System.IO.Path.DirectorySeparatorChar, '.');
+			ChangeVariableTextNodeValue<NamespaceNameNode> (namespaceName);
+		}
+
+		public void ChangeVariableTextNodeValue<T> (string text)
+			where T : VariableTextNode
+		{
 			if (_templateData == null) {
 				return;
 			}
-			typeName = typeName.Replace (" ", "_").Replace ("\\t", "_");
+			text = text ?? string.Empty;
 			foreach (var line in _templateData) {
 				if (line == null) {
 					continue;
@@ -113,12 +141,13 @@ namespace CustomTemplate
 					if (node == null) {
 						continue;
 					}
-					if (node is ClassNameNode) {
-						var classNameNode = (ClassNameNode)node;
-						classNameNode.Text = typeName;
+					if (node is T) {
+						var classNameNode = (T)node;
+						classNameNode.Text = text;
 					}
 				}
 			}
+
 		}
 
 		public string BuildCode ()
