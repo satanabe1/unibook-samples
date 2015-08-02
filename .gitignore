@@ -45,6 +45,6 @@ Assembly-*
 Temp
 
 # Templatematerializer
-Assets/TemplateMaterializer/Editor/TemplateMaterializerCommand.design.cs
-Assets/TemplateMaterializer/Editor/TemplateMaterializerCommand.design.cs.meta
+Assets/CustomTemplater/Editor/TemplateMaterializerCommand.design.cs
+Assets/CustomTemplater/Editor/TemplateMaterializerCommand.design.cs.meta
 

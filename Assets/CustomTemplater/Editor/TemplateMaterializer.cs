@@ -116,7 +116,7 @@ public class TemplateMaterializer
 		method.ModifierList.Add (Modifier.Static);
 		// method attribute [MenuItem("hoge", false, 90)]
 		AttributeText attribute = new AttributeText () { Name = typeof(MenuItem).Name};
-		attribute.ParameterList.Add (MaterializeCommandPrefix + "/Create " + templateName);
+		attribute.ParameterList.Add (MaterializeCommandPrefix + "/" + templateName);
 		attribute.ParameterList.Add (false);
 		attribute.ParameterList.Add (MaterializeCommandPriority);
 		method.AttributeList.Add (attribute);
