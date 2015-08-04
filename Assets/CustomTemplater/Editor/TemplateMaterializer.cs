@@ -5,6 +5,7 @@ using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 using CodeBuilder;
 using CustomTemplate;
 
@@ -86,7 +87,8 @@ public class TemplateMaterializer
 		if (Directory.Exists (dirPath) == false) {
 			return new string[0];
 		}
-		return Directory.GetFiles (dirPath, "*" + TemplateExtension, SearchOption.AllDirectories);
+		string[] templateFilePaths = Directory.GetFiles (dirPath, "*" + TemplateExtension, SearchOption.AllDirectories);
+		return templateFilePaths.Select((path) => path.Replace(Path.DirectorySeparatorChar, '/')).ToArray();
 	}
 
 	private static TypeDeclaration CreateEmptyCommandType ()

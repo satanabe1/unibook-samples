@@ -128,7 +128,12 @@ namespace CustomTemplate
 
 		public void RenameNamespace (string namespaceName)
 		{
-			namespaceName = namespaceName.Replace (' ', '_').Replace ("\\t", "_").Replace (System.IO.Path.DirectorySeparatorChar, '.');
+			namespaceName = namespaceName
+				.Replace (' ', '_')
+				.Replace ("\\t", "_")
+				.Replace ('/', '.')
+				.Replace ('\\', '.')
+				.Replace (System.IO.Path.DirectorySeparatorChar, '.');
 			ChangeVariableTextNodeValue<NamespaceNameNode> (namespaceName);
 		}
 
