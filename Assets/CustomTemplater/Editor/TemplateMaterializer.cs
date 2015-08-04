@@ -26,7 +26,7 @@ public class TemplateMaterializer
 			if (_projectRootPathCache != null) {
 				return _projectRootPathCache;
 			}
-			_projectRootPathCache = Directory.GetParent (Application.dataPath).ToString ();
+			_projectRootPathCache = EditorCommon.CurrentProjectRootPath;
 			return _projectRootPathCache;
 		}
 	}

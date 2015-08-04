@@ -5,6 +5,12 @@ using System.Collections.Generic;
 
 public static class EditorCommon
 {
+	public static string CurrentProjectRootPath {
+		get {
+			return System.IO.Directory.GetParent (Application.dataPath).ToString ();
+		}
+	}
+
 	public static void DrawButton (System.Action onClick)
 	{
 		if (onClick != null) {
@@ -19,7 +25,7 @@ public static class EditorCommon
 		string text = (label == null) ? null : label.ToString ();
 		if (GUILayout.Button (text)) {
 			if (onClick != null) {
-				onClick ();
+				onClick.Invoke ();
 			}
 		}
 	}
@@ -29,7 +35,7 @@ public static class EditorCommon
 		string text = (label == null) ? null : label.ToString ();
 		if (GUILayout.Button (text)) {
 			if (onClick != null) {
-				onClick (label);
+				onClick.Invoke (label);
 			}
 		}
 	}
@@ -173,9 +179,9 @@ public static class EditorCommon
 		Selection.activeObject = AssetDatabase.LoadAssetAtPath<Object> (assetPath);
 	}
 
-	public static string GetParentDirectoryPath(string path)
+	public static string GetParentDirectoryPath (string path)
 	{
-		return System.IO.Directory.GetParent(path).ToString();
+		return System.IO.Directory.GetParent (path).ToString ();
 	}
 
 	public static class Events
