@@ -1,4 +1,4 @@
-﻿#define VERBOSE_LOG
+#define VERBOSE_LOG
 using UnityEngine;
 using UnityEditor;
 using System.IO;
@@ -63,10 +63,13 @@ public class TemplateMaterializer
 		DumpStatics ();
 		Debug.Log (EditorCommon.CollectionToString (templateFilePaths));
 #endif
+		TemplateLabelConfig labelConfig = ReadTemplateLabelConfig(TemplatesDirPath);
 
 		TypeDeclaration commandType = CreateEmptyCommandType ();
 		foreach (var templateFilePath in templateFilePaths) {
-			commandType.MethodDeclarationList.Add (CreateMaterializeCommandMethod (templateFilePath));
+			string templateFileName = Path.GetFileNameWithoutExtension(templateFilePath);
+			string commandString = labelConfig.GetLabel(templateFileName);
+			commandType.MethodDeclarationList.Add (CreateMaterializeCommandMethod (templateFilePath, commandString));
 		}
 		Debug.Log (commandType.BuildCode ());
 		string code = CodeIndenter.Pretty (commandType.BuildCode ());
@@ -88,7 +91,13 @@ public class TemplateMaterializer
 			return new string[0];
 		}
 		string[] templateFilePaths = Directory.GetFiles (dirPath, "*" + TemplateExtension, SearchOption.AllDirectories);
-		return templateFilePaths.Select((path) => path.Replace(Path.DirectorySeparatorChar, '/')).ToArray();
+		return templateFilePaths.Select ((path) => path.Replace (Path.DirectorySeparatorChar, '/')).ToArray ();
+	}
+
+	private static TemplateLabelConfig ReadTemplateLabelConfig (string dirPath)
+	{
+		string labelFilePath = Path.Combine (dirPath, TemplateLabelConfig.LabelFileName);
+		return new TemplateLabelConfig (labelFilePath);
 	}
 
 	private static TypeDeclaration CreateEmptyCommandType ()
@@ -103,7 +112,7 @@ public class TemplateMaterializer
 		return typeDeclaration;
 	}
 
-	private static MethodDeclaration CreateMaterializeCommandMethod (string templateFilePath)
+	private static MethodDeclaration CreateMaterializeCommandMethod (string templateFilePath, string commandName)
 	{
 		string templateName = Path.GetFileNameWithoutExtension (templateFilePath).Replace ('.', '_').Replace (' ', '_');
 		StringBuilder methodBody = new StringBuilder ();
@@ -118,7 +127,8 @@ public class TemplateMaterializer
 		method.ModifierList.Add (Modifier.Static);
 		// method attribute [MenuItem("hoge", false, 90)]
 		AttributeText attribute = new AttributeText () { Name = typeof(MenuItem).Name};
-		attribute.ParameterList.Add (MaterializeCommandPrefix + "/" + templateName);
+		string commandText = string.IsNullOrEmpty(commandName) ? templateName : commandName;
+		attribute.ParameterList.Add (MaterializeCommandPrefix + "/" + commandText);
 		attribute.ParameterList.Add (false);
 		attribute.ParameterList.Add (MaterializeCommandPriority);
 		method.AttributeList.Add (attribute);

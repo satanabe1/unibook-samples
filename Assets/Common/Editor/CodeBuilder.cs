@@ -103,7 +103,8 @@ namespace CodeBuilder
 				} else if (enumerator.Current == null) {
 					sb.Append ("null");
 				} else if (enumerator.Current is string) {
-					sb.Append ("\"").Append (enumerator.Current).Append ("\"");
+					string txt = ((string)enumerator.Current).Replace("\"", "\\\"");
+					sb.Append ("\"").Append (txt).Append ("\"");
 				} else {
 					sb.Append (enumerator.Current);
 				}
@@ -180,7 +181,7 @@ namespace CodeBuilder
 					sb.Append (", ");
 				}
 			}
-			sb.Append (")");
+			sb.Append (") ");
 			// method body
 			if (ModifierList.Contains (Modifier.Abstract) == false) {
 				sb.AppendLine ("{");

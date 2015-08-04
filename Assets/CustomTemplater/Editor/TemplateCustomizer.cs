@@ -130,7 +130,7 @@ namespace CustomTemplate
 		{
 			namespaceName = namespaceName
 				.Replace (' ', '_')
-				.Replace ("\\t", "_")
+				.Replace ('\t', '_')
 				.Replace ('/', '.')
 				.Replace ('\\', '.')
 				.Replace (System.IO.Path.DirectorySeparatorChar, '.');

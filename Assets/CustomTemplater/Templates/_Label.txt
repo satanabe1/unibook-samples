@@ -1,0 +1,5 @@
+# comment
+// and comment
+
+DefaultCSharpCode.cs:C#:Default
+uGUICSharpCode.cs:C# "uGUI"
