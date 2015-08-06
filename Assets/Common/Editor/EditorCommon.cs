@@ -2,6 +2,7 @@
 using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
+using EditorCommonInternal;
 
 public static class EditorCommon
 {
@@ -9,6 +10,11 @@ public static class EditorCommon
 		get {
 			return System.IO.Directory.GetParent (Application.dataPath).ToString ();
 		}
+	}
+
+	public static string GetExtension (Object asset)
+	{
+		return (asset != null) ? System.IO.Path.GetExtension (AssetDatabase.GetAssetPath (asset)) : string.Empty;
 	}
 
 	public static void DrawButton (System.Action onClick)
@@ -150,6 +156,16 @@ public static class EditorCommon
 		EditorApplication.update += delayCaller;
 	}
 
+	public static void EditAssetName(string defaultName, Texture2D icon, System.Action<string> onEditName)
+	{
+		if (onEditName == null)
+		{
+			return;
+		}
+		OnAssetRenamedCallback renamedCallback = OnAssetRenamedCallback.CreateEventInstance(onEditName);
+		UnityEditor.ProjectWindowUtil.StartNameEditingIfProjectWindowExists(0, renamedCallback, defaultName, icon, string.Empty);
+	}
+
 	public static void RenameCommand (Object obj)
 	{
 		EngageRenameMode (obj);
@@ -186,11 +202,11 @@ public static class EditorCommon
 
 	public static class Events
 	{
-		#if UNITY_EDITOR_WIN
+#if UNITY_EDITOR_WIN
 		public static Event Rename = new Event () { keyCode = KeyCode.F2, type = EventType.KeyDown };
-        #else
+#else
 		public static Event Rename = new Event () { keyCode = KeyCode.Return, type = EventType.KeyDown };
-        #endif
+#endif
 	}
 
 	public static void OpenFolder (string path)
@@ -204,3 +220,26 @@ public static class EditorCommon
 #endif
 	}
 }
+
+namespace EditorCommonInternal
+{
+	public class OnAssetRenamedCallback : UnityEditor.ProjectWindowCallback.EndNameEditAction
+	{
+		private System.Action<string> _editNameCallback;
+	
+		public static OnAssetRenamedCallback CreateEventInstance (System.Action<string> editNameCallback)
+		{
+			var renamedEvent = ScriptableObject.CreateInstance<OnAssetRenamedCallback> ();
+			renamedEvent._editNameCallback = editNameCallback;
+			return renamedEvent;
+		}
+
+		public override void Action (int instanceId, string pathName, string resourceFile)
+		{
+			if (_editNameCallback != null) {
+				_editNameCallback.Invoke (pathName);
+			}
+		}
+	}
+}
+

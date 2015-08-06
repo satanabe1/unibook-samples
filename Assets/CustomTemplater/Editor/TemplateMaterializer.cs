@@ -63,12 +63,12 @@ public class TemplateMaterializer
 		DumpStatics ();
 		Debug.Log (EditorCommon.CollectionToString (templateFilePaths));
 #endif
-		TemplateLabelConfig labelConfig = ReadTemplateLabelConfig(TemplatesDirPath);
+		TemplateLabelConfig labelConfig = ReadTemplateLabelConfig (TemplatesDirPath);
 
 		TypeDeclaration commandType = CreateEmptyCommandType ();
 		foreach (var templateFilePath in templateFilePaths) {
-			string templateFileName = Path.GetFileNameWithoutExtension(templateFilePath);
-			string commandString = labelConfig.GetLabel(templateFileName);
+			string templateFileName = Path.GetFileNameWithoutExtension (templateFilePath);
+			string commandString = labelConfig.GetLabel (templateFileName);
 			commandType.MethodDeclarationList.Add (CreateMaterializeCommandMethod (templateFilePath, commandString));
 		}
 		Debug.Log (commandType.BuildCode ());
@@ -127,7 +127,7 @@ public class TemplateMaterializer
 		method.ModifierList.Add (Modifier.Static);
 		// method attribute [MenuItem("hoge", false, 90)]
 		AttributeText attribute = new AttributeText () { Name = typeof(MenuItem).Name};
-		string commandText = string.IsNullOrEmpty(commandName) ? templateName : commandName;
+		string commandText = string.IsNullOrEmpty (commandName) ? templateName : commandName;
 		attribute.ParameterList.Add (MaterializeCommandPrefix + "/" + commandText);
 		attribute.ParameterList.Add (false);
 		attribute.ParameterList.Add (MaterializeCommandPriority);
@@ -167,30 +167,23 @@ public class TemplateMaterializer
 		for (var i = 1; File.Exists(uniqueDistPath) || File.Exists(uniqueDistPath + fileExtension); ++i) {
 			uniqueDistPath = distPathWithoutExtension + i;
 		}
-		File.Copy (templatePath, uniqueDistPath);
-		AssetDatabase.Refresh ();
-		Object newClassFile = AssetDatabase.LoadAssetAtPath<Object> (uniqueDistPath.Substring (ProjectRootPath.Length + 1));
-		Selection.activeObject = newClassFile;
-		EditorCommon.DelayCall (3f / 60f, () => {
-			EditorCommon.RenameCommand (newClassFile);
-			FileMoveWatcher renameWatcher = new FileMoveWatcher ();
-			renameWatcher.Watch (Selection.activeObject, (from, to) => {
-#if VERBOSE_LOG
-				Debug.Log ("Move " + from + " To " + to);
-#endif
-				renameWatcher.Dispose ();
-				renameWatcher = null;
-				if (DirtyTemplate (to)) {
-					AssetDatabase.CopyAsset (to, to + fileExtension);
-					EditorCommon.SelectAssetPath (to + fileExtension);
-					EditorCommon.DelayCall (2f / 60f, () => {
-						AssetDatabase.DeleteAsset (to);
-						AssetDatabase.Refresh ();
-						EditorUtility.UnloadUnusedAssetsImmediate (true);
-					});
-				}
-				return true;
-			});
+		string uniqueDistName = Path.GetFileNameWithoutExtension (uniqueDistPath);
+
+		Texture2D jsIcon = EditorGUIUtility.Load ("cs Script Icon") as Texture2D;
+
+		EditorCommon.EditAssetName (uniqueDistName, jsIcon, (renamedPath) => {
+			string fixedDistPath = renamedPath + fileExtension;
+			Debug.Log ("Copy " + templatePath + " To " + fixedDistPath);
+			if (File.Exists (fixedDistPath) == true) {
+				Debug.LogError ("already exists : " + fixedDistPath);
+				return;
+			}
+			File.Copy (templatePath, fixedDistPath);
+			if (DirtyTemplate (fixedDistPath)) {
+				EditorCommon.SelectAssetPath (fixedDistPath);
+			}
+			AssetDatabase.Refresh ();
+			EditorUtility.UnloadUnusedAssetsImmediate ();
 		});
 	}
 
