@@ -168,14 +168,13 @@ public class TemplateMaterializer
 			uniqueDistPath = distPathWithoutExtension + i;
 		}
 		string uniqueDistName = Path.GetFileNameWithoutExtension (uniqueDistPath);
+		var scriptIcon = EditorCommon.GetScriptIcon(fileExtension) as Texture2D;
 
-		Texture2D jsIcon = EditorGUIUtility.Load ("cs Script Icon") as Texture2D;
-
-		EditorCommon.EditAssetName (uniqueDistName, jsIcon, (renamedPath) => {
+		EditorCommon.EditAssetName (uniqueDistName, scriptIcon, (renamedPath) => {
 			string fixedDistPath = renamedPath + fileExtension;
-			Debug.Log ("Copy " + templatePath + " To " + fixedDistPath);
+			Debug.Log ("Copy " + templatePath + " to " + fixedDistPath);
 			if (File.Exists (fixedDistPath) == true) {
-				Debug.LogError ("already exists : " + fixedDistPath);
+				Debug.LogError ("Already exists : " + fixedDistPath);
 				return;
 			}
 			File.Copy (templatePath, fixedDistPath);

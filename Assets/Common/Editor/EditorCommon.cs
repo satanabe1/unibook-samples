@@ -6,6 +6,12 @@ using EditorCommonInternal;
 
 public static class EditorCommon
 {
+	public static class ScriptTypeExtension
+	{
+		public const string Boo = ".boo";
+		public const string CSharp = ".cs";
+		public const string JavaScript = ".js";
+	}
 	public static string CurrentProjectRootPath {
 		get {
 			return System.IO.Directory.GetParent (Application.dataPath).ToString ();
@@ -156,14 +162,61 @@ public static class EditorCommon
 		EditorApplication.update += delayCaller;
 	}
 
-	public static void EditAssetName(string defaultName, Texture2D icon, System.Action<string> onEditName)
+	public static void EditAssetName (string defaultName, Texture2D icon, System.Action<string> onEditName)
 	{
-		if (onEditName == null)
-		{
+		if (onEditName == null) {
 			return;
 		}
-		OnAssetRenamedCallback renamedCallback = OnAssetRenamedCallback.CreateEventInstance(onEditName);
-		UnityEditor.ProjectWindowUtil.StartNameEditingIfProjectWindowExists(0, renamedCallback, defaultName, icon, string.Empty);
+		OnAssetRenamedCallback renamedCallback = OnAssetRenamedCallback.CreateEventInstance (onEditName);
+		UnityEditor.ProjectWindowUtil.StartNameEditingIfProjectWindowExists (0, renamedCallback, defaultName, icon, string.Empty);
+	}
+
+	public static Texture GetEditorIcon<T> ()
+	{
+		GUIContent objectContent = EditorGUIUtility.ObjectContent (null, typeof(T));
+		return (objectContent != null) ? objectContent.image : null;
+	}
+
+	/// <summary>
+	/// ".cs" ...
+	/// </summary>
+	/// <returns>The script icon.</returns>
+	/// <param name="scriptFileExtension">Script file extension.</param>
+	public static Texture GetScriptIcon (string scriptFileExtension = null)
+	{
+		if (string.IsNullOrEmpty (scriptFileExtension)) {
+			return GetEditorIcon<MonoScript> ();
+		}
+		switch (scriptFileExtension) {
+		case ScriptTypeExtension.Boo:
+			return EditorCommon.GetBooScriptIcon ();
+		case ScriptTypeExtension.CSharp:
+			return EditorCommon.GetCsScriptIcon ();
+		case ScriptTypeExtension.JavaScript:
+			return EditorCommon.GetJsScriptIcon ();
+		default:
+			return GetEditorIcon<MonoScript>();
+		}
+	}
+
+	public static Texture GetCsScriptIcon ()
+	{
+		return EditorGUIUtility.Load ("cs Script Icon") as Texture;
+	}
+
+	public static Texture GetJsScriptIcon ()
+	{
+		return EditorGUIUtility.Load ("Js Script Icon") as Texture;
+	}
+
+	public static Texture GetBooScriptIcon ()
+	{
+		return EditorGUIUtility.Load ("boo Script Icon") as Texture;
+	}
+
+	public static Texture GetBuiltInTexutre (string path)
+	{
+		return EditorGUIUtility.Load (path) as Texture;
 	}
 
 	public static void RenameCommand (Object obj)
