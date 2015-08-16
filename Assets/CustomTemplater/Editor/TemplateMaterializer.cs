@@ -19,7 +19,8 @@ public class TemplateMaterializer
 	public const int MaterializeCommandPriority = 10;
 	public const string TemplatesDirName = "Templates";
 	public const string TemplateExtension = ".tmtemplate";
-	public static string _projectRootPathCache;
+	private static string _projectRootPathCache;
+	private static string _scriptDirPathCache;
 
 	public static string ProjectRootPath {
 		get {
@@ -30,8 +31,6 @@ public class TemplateMaterializer
 			return _projectRootPathCache;
 		}
 	}
-
-	private static string _scriptDirPathCache;
 
 	public static string ScriptDirPath {
 		get {

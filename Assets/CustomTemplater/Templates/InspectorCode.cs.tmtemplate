@@ -1,0 +1,14 @@
+using UnityEngine;
+using UnityEditor;
+using System.Collections;
+using System.Collections.Generic;
+
+//[CustomEditor(typeof())]
+public class $ClassName$ : Editor
+{
+	public override void OnInspectorGUI ()
+	{
+		base.OnInspectorGUI ();
+		var instance = target as Object;
+	}
+}
