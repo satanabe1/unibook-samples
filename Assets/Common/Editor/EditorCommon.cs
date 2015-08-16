@@ -11,6 +11,7 @@ public static class EditorCommon
 		public const string Boo = ".boo";
 		public const string CSharp = ".cs";
 		public const string JavaScript = ".js";
+		public const string Shader = ".shader";
 	}
 	public static string CurrentProjectRootPath {
 		get {
@@ -194,6 +195,8 @@ public static class EditorCommon
 			return EditorCommon.GetCsScriptIcon ();
 		case ScriptTypeExtension.JavaScript:
 			return EditorCommon.GetJsScriptIcon ();
+		case ScriptTypeExtension.Shader:
+			return EditorCommon.GetShaderIcon ();
 		default:
 			return GetEditorIcon<MonoScript>();
 		}
@@ -212,6 +215,11 @@ public static class EditorCommon
 	public static Texture GetBooScriptIcon ()
 	{
 		return EditorGUIUtility.Load ("boo Script Icon") as Texture;
+	}
+
+	public static Texture GetShaderIcon ()
+	{
+		return EditorGUIUtility.Load ("Shader Icon") as Texture;
 	}
 
 	public static Texture GetBuiltInTexutre (string path)

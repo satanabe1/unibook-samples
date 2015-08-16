@@ -171,6 +171,7 @@ public class TemplateMaterializer
 		var scriptIcon = EditorCommon.GetScriptIcon(fileExtension) as Texture2D;
 
 		EditorCommon.EditAssetName (uniqueDistName, scriptIcon, (renamedPath) => {
+			scriptIcon = null;
 			string fixedDistPath = renamedPath + fileExtension;
 			Debug.Log ("Copy " + templatePath + " to " + fixedDistPath);
 			if (File.Exists (fixedDistPath) == true) {
@@ -182,7 +183,7 @@ public class TemplateMaterializer
 				EditorCommon.SelectAssetPath (fixedDistPath);
 			}
 			AssetDatabase.Refresh ();
-			EditorUtility.UnloadUnusedAssetsImmediate ();
+			EditorApplication.delayCall += EditorUtility.UnloadUnusedAssetsImmediate;
 		});
 	}
 
