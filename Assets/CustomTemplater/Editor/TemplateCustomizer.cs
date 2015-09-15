@@ -7,9 +7,9 @@ namespace CustomTemplate
 {
 	public static class TemplateKeyword
 	{
-		public const string ClassName = "$ClassName$";
-		public const string Namespace = "$Namespace$";
-		public const string DateTime = "$Timestamp$";
+		public const string ClassName = "#ClassName#";
+		public const string Namespace = "#Namespace#";
+		public const string DateTime = "#Timestamp#";
 	}
 
 	public interface INode

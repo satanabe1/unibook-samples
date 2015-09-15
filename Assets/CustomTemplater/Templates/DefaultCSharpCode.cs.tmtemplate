@@ -1,8 +1,8 @@
-// $Timestamp$
+// #Timestamp#
 using UnityEngine;
 using System.Collections;
 
-public class $ClassName$ : MonoBehaviour {
+public class #ClassName# : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {

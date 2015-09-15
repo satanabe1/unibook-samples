@@ -54,8 +54,6 @@ public class FileMoveWatcher : System.IDisposable
 	/// <summary>
 	/// アセットのmoveを監視する. onMoveの戻り値がtrueなら、監視を終了する.
 	/// </summary>
-	/// <param name="asset">Asset.</param>
-	/// <param name="onMoveCallback">On move callback.</param>
 	public void Watch (Object asset, System.Func<string, string, bool> onMove)
 	{
 		if ((asset == null) || (onMove == null)) {
@@ -67,8 +65,6 @@ public class FileMoveWatcher : System.IDisposable
 	/// <summary>
 	/// アセットのmoveを監視する. onMoveの戻り値がtrueなら、監視を終了する.
 	/// </summary>
-	/// <param name="assetPath">Asset path.</param>
-	/// <param name="onMove">On move.</param>
 	public void Watch (string assetPath, System.Func<string, string, bool> onMove)
 	{
 		if (string.IsNullOrEmpty (assetPath) || (onMove == null)) {
@@ -80,7 +76,6 @@ public class FileMoveWatcher : System.IDisposable
 	/// <summary>
 	/// アセットのmoveを監視する. 
 	/// </summary>
-	/// <param name="fileWatchEntry">File watch entry.</param>
 	public void Watch (FileWatchEntry fileWatchEntry)
 	{
 		if (fileWatchEntry.isValid == false) {

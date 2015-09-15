@@ -1,9 +1,9 @@
 using UnityEngine;
 using System.Collections;
 
-namespace $Namespace$
+namespace #Namespace#
 {
-	public class $ClassName$ : MonoBehaviour {
+	public class #ClassName# : MonoBehaviour {
 
 		// Use this for initialization
 		void Start () {

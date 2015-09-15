@@ -181,8 +181,6 @@ public static class EditorCommon
 	/// <summary>
 	/// ".cs" ...
 	/// </summary>
-	/// <returns>The script icon.</returns>
-	/// <param name="scriptFileExtension">Script file extension.</param>
 	public static Texture GetScriptIcon (string scriptFileExtension = null)
 	{
 		if (string.IsNullOrEmpty (scriptFileExtension)) {
@@ -238,6 +236,12 @@ public static class EditorCommon
 		//		GetFocusedWindow ("Hierarchy").SendEvent (Events.Rename);
 		GetFocusedWindow ("Project").SendEvent (Events.Rename);
 		//		UnityEditor.EditorWindow.focusedWindow.SendEvent(Events.Rename);
+	}
+
+	public static void SendAssetRenameKeyEvent(Object asset)
+	{
+		Selection.activeObject = asset;
+		GetFocusedWindow ("Project").SendEvent (Events.Rename);
 	}
 	
 	public static EditorWindow GetFocusedWindow (string window)
